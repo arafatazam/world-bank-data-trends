@@ -6,12 +6,22 @@ World bank data analysis
 """
 
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from textwrap import wrap
 
-def read_and_clean_data(file_name: str)->pd.DataFrame:
+
+def read_data(file_name: str) -> pd.DataFrame:
     df = pd.read_excel(file_name, index_col=[0, 1])
     return df
+
+
+def log_normalize(data: pd.DataFrame) -> pd.DataFrame:
+    df = data
+    for col in data.columns:
+        df[col] = np.log(df[col])
+    return df
+
 
 def corr_heat_map(data: pd.DataFrame, country: str):
     df = data.xs(country, level=1)
@@ -29,29 +39,34 @@ def corr_heat_map(data: pd.DataFrame, country: str):
         for j in range(len(corr.columns)):
             text = ax.text(j, i, round(corr.to_numpy()[i, j], 2),
                            ha="center", va="center", color="black")
-    
-    plt.title(f'Correlation heat map of {country}')
+
+    plt.title(f'Correlation - {country}')
     plt.tight_layout()
     plt.show()
 
 
 def greenhouse_gas_emission_barchart(data: pd.DataFrame):
     df = data.loc["Total greenhouse gas emissions (kt of CO2 equivalent)"]
-    years = [f'{year}' for year in range(1990, 2020, 4)]
+    years = [f'{year}' for year in range(1991, 2020, 4)]
     df = df[years]
-    ax = df.plot(kind='bar', rot=20, figsize=(12,12))
+    df = log_normalize(df)
+    ax = df.plot(kind='bar', rot=90, figsize=(10, 7))
     ax.set_title('Total greenhouse gas emissions')
     ax.set_xlabel('Countries')
-    ax.set_ylabel('kt of CO2 equivalent')
-    ax.get_figure().set_size_inches(6, 5)
+    ax.set_ylabel('Total greenhouse gas emissions\nlog(kt) CO2 equivalent)')
+    ax.set_ylim(ymin=11)
+    ax.get_figure().set_size_inches(10, 7)
     plt.tight_layout()
     plt.show()
 
 
 def main():
-    df = read_and_clean_data('wb_data.xlsx')
+    df = read_data('wb_data.xlsx')
     greenhouse_gas_emission_barchart(df)
-    corr_heat_map(df, "United Kingdom")
+
+    countries = df.index.get_level_values(1).unique()
+    for country in countries:
+        corr_heat_map(df, country)
 
 
 if __name__ == "__main__":

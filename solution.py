@@ -9,6 +9,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from textwrap import wrap
 
+def read_and_clean_data(file_name: str)->pd.DataFrame:
+    df = pd.read_excel(file_name, index_col=[0, 1])
+    return df
 
 def corr_heat_map(data: pd.DataFrame, country: str):
     df = data.xs(country, level=1)
@@ -26,13 +29,15 @@ def corr_heat_map(data: pd.DataFrame, country: str):
         for j in range(len(corr.columns)):
             text = ax.text(j, i, round(corr.to_numpy()[i, j], 2),
                            ha="center", va="center", color="black")
+    
+    plt.title(f'Correlation heat map of {country}')
     plt.tight_layout()
     plt.show()
 
 
 def greenhouse_gas_emission_barchart(data: pd.DataFrame):
     df = data.loc["Total greenhouse gas emissions (kt of CO2 equivalent)"]
-    years = ["1990", "1995", "2000", "2005", "2010", "2015"]
+    years = [f'{year}' for year in range(1990, 2020, 4)]
     df = df[years]
     ax = df.plot(kind='bar', rot=20, figsize=(12,12))
     ax.set_title('Total greenhouse gas emissions')
@@ -44,7 +49,7 @@ def greenhouse_gas_emission_barchart(data: pd.DataFrame):
 
 
 def main():
-    df = pd.read_excel('wb_data.xlsx', index_col=[0, 1])
+    df = read_and_clean_data('wb_data.xlsx')
     greenhouse_gas_emission_barchart(df)
     corr_heat_map(df, "United Kingdom")
 

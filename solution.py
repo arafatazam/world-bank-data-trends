@@ -29,7 +29,7 @@ def corr_heat_map(data: pd.DataFrame, country: str):
     df = df.T
     corr = df.corr()
     fig, ax = plt.subplots(figsize=(8, 8))
-    im = ax.imshow(corr, interpolation='nearest', cmap='RdYlGn')
+    im = ax.imshow(corr, interpolation='nearest', cmap='RdYlGn', vmin=-1, vmax=1)
     fig.colorbar(im, orientation='vertical', fraction=0.05)
     ax.set_xticklabels(['']+["\n".join(wrap(x, 30))
                        for x in corr.columns.to_list()], rotation=90, fontsize=8)

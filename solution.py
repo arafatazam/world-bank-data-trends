@@ -12,11 +12,20 @@ from textwrap import wrap
 
 
 def read_data(file_name: str) -> pd.DataFrame:
+    """
+    Read data from the world bank data excel file
+    World bank data bank tool was utilized to choose
+    specific countries, attributes and years.
+    """
     df = pd.read_excel(file_name, index_col=[0, 1])
     return df
 
 
 def log_normalize(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalize all the columns of a dataframe using logarithm function.
+    It allows comparison among extremely diverse range of data.
+    """
     df = data
     for col in data.columns:
         df[col] = np.log(df[col])
@@ -24,12 +33,16 @@ def log_normalize(data: pd.DataFrame) -> pd.DataFrame:
 
 
 def corr_heat_map(data: pd.DataFrame, country: str):
+    """
+    Generates heat map from the correlation matrix among the attributes.
+    """
     df = data.xs(country, level=1)
     df = df.dropna(axis='columns')
     df = df.T
     corr = df.corr()
     fig, ax = plt.subplots(figsize=(8, 8))
-    im = ax.imshow(corr, interpolation='nearest', cmap='RdYlGn', vmin=-1, vmax=1)
+    im = ax.imshow(corr, interpolation='nearest',
+                   cmap='RdYlGn', vmin=-1, vmax=1)
     fig.colorbar(im, orientation='vertical', fraction=0.05)
     ax.set_xticklabels(['']+["\n".join(wrap(x, 30))
                        for x in corr.columns.to_list()], rotation=90, fontsize=8)
@@ -46,6 +59,10 @@ def corr_heat_map(data: pd.DataFrame, country: str):
 
 
 def greenhouse_gas_emission_barchart(data: pd.DataFrame):
+    """
+    Generates barchart to show the increase and decrease of greenhouse gas emission
+    over the years.
+    """
     df = data.loc["Total greenhouse gas emissions (kt of CO2 equivalent)"]
     years = [f'{year}' for year in range(1991, 2020, 4)]
     df = df[years]
